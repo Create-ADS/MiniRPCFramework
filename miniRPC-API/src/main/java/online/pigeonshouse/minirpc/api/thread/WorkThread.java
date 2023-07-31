@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 本来API里是没有这个类的，我本来可以直接用线程池的
  * 但当我写完我才意识到这个问题
  * 没办法，我总不能删除这个类的源码吧？！
- * 我直接夹带私货！
+ * 我打算后续实现功能时用到，至少截止至2023/7/31，此类无作用
  */
 public class WorkThread implements Runnable {
     private final PriorityQueue<WorkTask<?>> workQueue = new PriorityQueue<>();
