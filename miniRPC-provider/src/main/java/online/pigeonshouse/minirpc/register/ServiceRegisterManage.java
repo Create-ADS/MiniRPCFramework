@@ -33,7 +33,7 @@ public class ServiceRegisterManage {
     }
 
     // 获取服务
-    public ServerServiceProperty getService(String group, String name, String version) {
+    public ServerServiceProperty lookup(String group, String name, String version) {
         String key = group + name + version;
         return serviceObjectMap.get(key);
     }
