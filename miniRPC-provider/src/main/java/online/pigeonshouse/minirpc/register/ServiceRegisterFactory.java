@@ -3,10 +3,17 @@ package online.pigeonshouse.minirpc.register;
 import cn.hutool.core.annotation.AnnotationUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
+import io.netty.channel.Channel;
 import online.pigeonshouse.minirpc.api.MiniService;
 import online.pigeonshouse.minirpc.api.exception.InitializationException;
+import online.pigeonshouse.minirpc.api.framwork.NettyBoot;
 import online.pigeonshouse.minirpc.api.service.rpc.Service;
+import online.pigeonshouse.minirpc.framwork.channel.ProtocolSelectorHandler;
+import online.pigeonshouse.minirpc.framwork.pool.SimpleObjectPool;
+import online.pigeonshouse.minirpc.framwork.pool.UserSessionPoolManager;
 import online.pigeonshouse.minirpc.service.ServerService;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * 此类用于扫描指定包下的所有类，将标注了@MiniService注解的类注册到注册中心
@@ -14,30 +21,41 @@ import online.pigeonshouse.minirpc.service.ServerService;
  * 注册中心的类名：ServiceRegister
  */
 public class ServiceRegisterFactory {
-    static {
-        referService("online.pigeonshouse.minirpc.service.impl");
-    }
-
     /**
      * 注册指定包下的所有符合条件的类到注册中心
      */
-    public static void referService(String packageName)  {
+    public static ServiceRegisterManage referService(String packageName, Channel channel)  {
+        ServiceRegisterManage manage = new ServiceRegisterManage();
         ClassUtil.scanPackage(packageName).forEach(clazz -> {
             try {
-                referService(clazz);
-            } catch (IllegalAccessException | InstantiationException | InitializationException e) {
+                referService(clazz, channel, manage);
+            } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
+                     InvocationTargetException e) {
                 e.printStackTrace();
             }
         });
+        return manage;
+    }
+
+    public static ServiceRegisterManage referService(String packageName, Channel channel, ServiceRegisterManage manage)  {
+        ClassUtil.scanPackage(packageName).forEach(clazz -> {
+            try {
+                referService(clazz, channel, manage);
+            } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
+                     InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        });
+        return manage;
     }
 
     /**
      * 注册指定类到注册中心
      */
-    public static void referService(Class<?> clazz) throws IllegalAccessException, InstantiationException, InitializationException {
+    public static ServiceRegisterManage referService(Class<?> clazz, Channel channel, ServiceRegisterManage manage) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         if (!isValidService(clazz)) {
             new InitializationException("Class " + clazz.getName() + " is not a valid service").printStackTrace();
-            return;
+            return null;
         }
         MiniService miniService = AnnotationUtil.getAnnotation(clazz, MiniService.class);
         String serviceName = miniService.name();
@@ -46,8 +64,12 @@ public class ServiceRegisterFactory {
         if (StrUtil.hasBlank(serviceName)) {
             throw new RuntimeException("Class " + clazz.getName() + " annotated by @MiniService has no name");
         }
-        ServerService serviceObject = (ServerService) clazz.newInstance();
-        ServiceRegisterManage.getInstance().register(serviceGroup, serviceName, serviceVersion, serviceObject);
+        UserSessionPoolManager poolManager = ProtocolSelectorHandler.getUserSessionPoolManager();
+        SimpleObjectPool put = poolManager.get(channel);
+        ServerService serviceObject = (ServerService) clazz.getConstructor(SimpleObjectPool.class, Channel.class)
+                .newInstance(put, channel);
+        manage.register(serviceGroup, serviceName, serviceVersion, serviceObject);
+        return manage;
     }
 
     /**

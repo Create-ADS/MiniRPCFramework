@@ -3,12 +3,6 @@ package online.pigeonshouse.minirpc.api.thread;
 import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * 本来API里是没有这个类的，我本来可以直接用线程池的
- * 但当我写完我才意识到这个问题
- * 没办法，我总不能删除这个类的源码吧？！
- * 我直接夹带私货！
- */
 public class WorkThread implements Runnable {
     private final PriorityQueue<WorkTask<?>> workQueue = new PriorityQueue<>();
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
@@ -123,14 +117,8 @@ public class WorkThread implements Runnable {
         }
     }
 
-    /**
-     * result是为了解决CallableWithCallback的问题
-     */
     private Object result = null;
 
-    /**
-     * 执行任务
-     */
     private <T> void executeTask(WorkTask<T> task) {
         try {
             if (task.getCount() > 0) {
@@ -141,7 +129,7 @@ public class WorkThread implements Runnable {
                     taskThread = new Thread(() -> {
                         try {
                             result = task.getCallable().call();
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             e.printStackTrace();
                             task.getCallback().onFailure(e);
                         }

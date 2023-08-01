@@ -9,9 +9,10 @@ public class UserSessionPoolManager {
     private Map<Channel, SimpleObjectPool> userSessionPools = new HashMap<>();
     private SimpleObjectPool globalSessionPool = new SimpleObjectPool();
 
-    public void put(Channel channel) {
+    public SimpleObjectPool put(Channel channel) {
         SimpleObjectPool pool = new SimpleObjectPool();
         userSessionPools.put(channel, pool);
+        return pool;
     }
 
     public SimpleObjectPool get(Channel channel) {

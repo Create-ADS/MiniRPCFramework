@@ -36,24 +36,7 @@ public class RpcInvokeHelperImpl extends AbstractRpcInvokeHelper {
 
     @Override
     protected <R> R parseResponse(MessageResponse response, Class<R> t) {
-        if (response.getException() != null) {
-            throw new RuntimeException(response.getException());
-        }
-        Object unwrap = MiniUtil.unwrap(response.getValue());
-        if (unwrap instanceof MiniObject) {
-            if (ClassUtil.isAssignable(t, MiniObject.class)) {
-                return (R) unwrap;
-            }
-            MiniObject miniObject = (MiniObject) unwrap;
-            String className = miniObject.getClassName();
-            try {
-                Class<?> aClass = ClassUtil.loadClass(className);
-                return (R) aClass.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return (R) unwrap;
+        return MiniUtil.parseResponse(response, t);
     }
 
     public MethodCache getMethodCache() {

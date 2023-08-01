@@ -1,7 +1,5 @@
 package online.pigeonshouse.minirpc.api.thread;
 
-import java.util.concurrent.CompletableFuture;
-
 public class WorkTask<T> implements Comparable<WorkTask<?>> {
     private final Runnable task;
     private final CallableWithCallback<T> callable;

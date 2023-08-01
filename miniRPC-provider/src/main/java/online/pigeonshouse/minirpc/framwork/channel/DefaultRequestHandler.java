@@ -11,7 +11,6 @@ import online.pigeonshouse.minirpc.framwork.pool.SimpleObjectPool;
 import online.pigeonshouse.minirpc.framwork.pool.UserSessionPoolManager;
 import online.pigeonshouse.minirpc.register.ServerServiceProperty;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Data
@@ -23,8 +22,9 @@ public class DefaultRequestHandler implements RequestHandler {
     public void handleRequest(RemoteCallRequest request, ChannelHandlerContext ctx) throws Throwable {
         UserSessionPoolManager poolManager = ProtocolSelectorHandler.getUserSessionPoolManager();
         SimpleObjectPool simpleObjectPool = poolManager.get(ctx.channel());
-        ServerServiceProperty lookup = serviceLocator.lookup(request);
+        ServerServiceProperty lookup = serviceLocator.lookup(request, simpleObjectPool);
         Object[] parameters = parameterResolver.resolve(request, simpleObjectPool);
+        System.out.println(Arrays.toString(parameters));
         Object result = lookup.invokeMethod(request.getMethodName(), parameters);
         RemoteCallResponse response = buildResponse(result, request.getSessionId(), simpleObjectPool);
         ctx.writeAndFlush(response);

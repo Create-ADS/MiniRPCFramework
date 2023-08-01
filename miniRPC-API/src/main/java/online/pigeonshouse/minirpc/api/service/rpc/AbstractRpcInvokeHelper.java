@@ -25,8 +25,9 @@ public abstract class AbstractRpcInvokeHelper implements RpcInvokeHelper {
     @Override
     public void invoke(Message message) {
         String requestId = sendMessage(message);
-        if (getResponse(requestId).getException() != null) {
-            throw new RuntimeException(getResponse(requestId).getException());
+        MessageResponse response = getResponse(requestId);
+        if (response.getException() != null) {
+            throw new RuntimeException(response.getException());
         }
     }
 

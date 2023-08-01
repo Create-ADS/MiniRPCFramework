@@ -9,15 +9,7 @@ import java.util.Map;
  * 注册中心，用于注册服务
  */
 public class ServiceRegisterManage {
-    private static ServiceRegisterManage serviceRegisterManage = new ServiceRegisterManage();
     private Map<String, ServerServiceProperty> serviceObjectMap = new HashMap<>();
-
-    public static ServiceRegisterManage getInstance() {
-        return serviceRegisterManage;
-    }
-
-    private ServiceRegisterManage() {
-    }
 
     /**
      * 注册服务

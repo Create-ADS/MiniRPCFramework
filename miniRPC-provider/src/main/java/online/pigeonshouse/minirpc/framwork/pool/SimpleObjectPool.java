@@ -7,9 +7,9 @@ import java.util.Map;
 
 public class SimpleObjectPool {
     private List<PoolListener> listeners = new ArrayList<>();
-    private Map<String, Object> pool = new HashMap<>();
+    private Map<Object, Object> pool = new HashMap<>();
 
-    public void put(String key, Object obj) {
+    public void put(Object key, Object obj) {
         Object oldObj = pool.get(key);
         pool.put(key, obj);
         if (oldObj == null) {
@@ -23,7 +23,7 @@ public class SimpleObjectPool {
         }
     }
 
-    public Object get(String key) {
+    public Object get(Object key) {
         Object obj = pool.get(key);
         for (PoolListener listener : listeners) {
             listener.onObjectGet(key, obj);
@@ -31,7 +31,12 @@ public class SimpleObjectPool {
         return obj;
     }
 
-    public void remove(String key) {
+    public <T> T get(Object key, Class<T> clazz) {
+        Object obj = get(key);
+        return clazz.cast(obj);
+    }
+
+    public void remove(Object key) {
         Object obj = pool.remove(key);
         for (PoolListener listener : listeners) {
             listener.onObjectRemoved(key, obj);

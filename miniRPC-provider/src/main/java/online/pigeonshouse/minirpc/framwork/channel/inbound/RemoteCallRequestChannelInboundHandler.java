@@ -32,12 +32,13 @@ public class RemoteCallRequestChannelInboundHandler extends SimpleChannelInbound
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, RemoteCallRequest request) {
+    public void channelRead0(ChannelHandlerContext ctx, RemoteCallRequest request) throws Exception {
         filterChain.doFilter(request, ctx);
         try {
             handler.handleRequest(request, ctx);
         } catch (Throwable e) {
-            ctx.channel().writeAndFlush(new RemoteCallResponse(e, request.getSessionId()));
+            e.printStackTrace();
+            ctx.channel().writeAndFlush(new RemoteCallResponse(e, request.getSessionId())).sync();
         }
     }
 }

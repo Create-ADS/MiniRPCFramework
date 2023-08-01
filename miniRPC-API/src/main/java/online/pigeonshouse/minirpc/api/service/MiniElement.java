@@ -11,6 +11,10 @@ public class MiniElement {
         this.objUUID = objUUID;
     }
 
+    public void setUUID(String uuid) {
+        this.objUUID = uuid;
+    }
+
     public String getUUID() {
         return objUUID;
     }

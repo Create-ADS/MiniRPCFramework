@@ -22,7 +22,6 @@ public class NettyServerBoot implements NettyBoot {
     private ChannelFuture channelFuture;
 
     public NettyServerBoot() {
-        
         BOSS = new NioEventLoopGroup();
         WOKER = new NioEventLoopGroup();
         SERVER_BOOTSTRAP = new ServerBootstrap();
@@ -30,7 +29,6 @@ public class NettyServerBoot implements NettyBoot {
         ProtocolSelectorHandler.addProtocolPackageFilter(new WebSocketProtocolPackageFilter());
         ProtocolSelectorHandler.addProtocolPackageFilter(new MiniRpcProtocolPackageFilter());
         registerHandler();
-        ServiceRegisterFactory.referService("online.pigeonshouse.minirpc.service.impl");
         SERVER_BOOTSTRAP.group(BOSS,WOKER)
                 .childOption(ChannelOption.TCP_NODELAY,true)
                 .channel(NioServerSocketChannel.class)
@@ -54,7 +52,7 @@ public class NettyServerBoot implements NettyBoot {
     }
 
     public void sendMessage(Message msg) throws InterruptedException {
-        channelFuture.channel().writeAndFlush(msg).sync();
+        throw new UnsupportedOperationException("Server can't send message");
     }
 
     public void registerHandler(){
