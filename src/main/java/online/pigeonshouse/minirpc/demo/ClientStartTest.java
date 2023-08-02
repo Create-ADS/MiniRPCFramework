@@ -60,9 +60,7 @@ public class ClientStartTest {
             }
         };
         responseFilter.addResponseFilter(listener);
-        //[ResponseFilterListener(sessionId=5743d4d0358c46748c826648005cb21b, paramsType=null)]
 //        helloService.invoke("sayHello", listener);
-        //[ResponseFilterListener(sessionId=83b89f9c4b64430c9bd9ca125b4f2fb9, paramsType=null)]
         hello.sayHello(listener);
         System.out.println(123);
     }
