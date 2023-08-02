@@ -13,6 +13,7 @@ public class DefaultParameterResolver implements ParameterResolver {
     @Override
     public Object[] resolve(RemoteCallRequest request, SimpleObjectPool pool) {
         List<Parameter> parameters = request.getParameters();
+        System.out.println(parameters);
         MiniObject[] miniObjects = MiniUtil.toObjects(parameters.toArray(new Parameter[0]));
         Object[] objects = MiniUtil.unwrapAsList(miniObjects);
         for (int i = 0; i < objects.length; i++) {
@@ -23,7 +24,7 @@ public class DefaultParameterResolver implements ParameterResolver {
                 }
                 Object obj = pool.get(miniObject.getClassName() + "&" + miniObject.getUUID());
                 if (obj == null) {
-                    throw new RuntimeException(new ClassNotFoundException(miniObject.getClassName()));
+                    throw new RuntimeException(new ClassNotFoundException("Key:" + miniObject.getClassName() + "&" + miniObject.getUUID() + " not found in pool"));
                 }
                 objects[i] = obj;
             }

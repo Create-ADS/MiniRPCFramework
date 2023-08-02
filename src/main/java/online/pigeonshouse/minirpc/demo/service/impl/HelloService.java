@@ -34,17 +34,15 @@ public class HelloService extends ServerService {
         return test.getString();
     }
 
-    @PublicService(isWait = true)
+    @PublicService()
     public void sayHello(ResponseFilterListener listener){
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                callCallback(listener.getSessionId(), new Object[]{"你好，这是一条回调消息！"});
+        while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-        }).start();
+            callCallback(listener.getSessionId(), new Object[]{"你好，这是一条回调消息！"});
+        }
     }
 }

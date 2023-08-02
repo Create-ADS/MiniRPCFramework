@@ -5,16 +5,17 @@ import online.pigeonshouse.minirpc.framwork.request.RemoteCallRequest;
 import online.pigeonshouse.minirpc.framwork.response.MessageResponse;
 import online.pigeonshouse.minirpc.framwork.response.RemoteCallResponse;
 
+import java.util.Arrays;
+
 public abstract class AbstractRpcInvokeHelper implements RpcInvokeHelper {
-    private final ServiceInvoke invoke;
+    protected abstract RemoteCallRequest buildRequest(String method, Object[] params);
+    protected abstract <R> R parseResponse(MessageResponse response, Class<R> t);
+    protected final ServiceInvoke invoke;
+    public static final Long DEFAULT_TIMEOUT = 2000L;
 
     public AbstractRpcInvokeHelper(ServiceInvoke invoke) {
         this.invoke = invoke;
     }
-
-    protected abstract RemoteCallRequest buildRequest(String method, Object[] params);
-
-    protected abstract <R> R parseResponse(MessageResponse response, Class<R> t);
 
     @Override
     public void invoke(String methodName, Object... params) {
@@ -40,15 +41,16 @@ public abstract class AbstractRpcInvokeHelper implements RpcInvokeHelper {
     @Override
     public <R> R invokeForResult(Class<R> t,Message message) {
         String requestId = sendMessage(message);
-        return parseResponse(getResponse(requestId), t);
+        MessageResponse response = getResponse(requestId);
+        return parseResponse(response, t);
     }
 
-    private String sendMessage(Message msg) {
+    protected String sendMessage(Message msg) {
         invoke.send(msg);
         return msg.getSessionId();
     }
 
-    private MessageResponse getResponse(String requestId) {
-        return invoke.getResult(requestId, new RemoteCallResponse(), 50000);
+    protected MessageResponse getResponse(String requestId) {
+        return invoke.getResult(requestId, new RemoteCallResponse(), DEFAULT_TIMEOUT);
     }
 }

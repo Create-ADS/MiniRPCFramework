@@ -1,5 +1,6 @@
 package online.pigeonshouse.minirpc.framwork.channel;
 
+import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.IdUtil;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.Data;
@@ -24,7 +25,6 @@ public class DefaultRequestHandler implements RequestHandler {
         SimpleObjectPool simpleObjectPool = poolManager.get(ctx.channel());
         ServerServiceProperty lookup = serviceLocator.lookup(request, simpleObjectPool);
         Object[] parameters = parameterResolver.resolve(request, simpleObjectPool);
-        System.out.println(Arrays.toString(parameters));
         Object result = lookup.invokeMethod(request.getMethodName(), parameters);
         RemoteCallResponse response = buildResponse(result, request.getSessionId(), simpleObjectPool);
         ctx.writeAndFlush(response);
@@ -33,7 +33,7 @@ public class DefaultRequestHandler implements RequestHandler {
     private RemoteCallResponse buildResponse(Object result, String sessionId, SimpleObjectPool pool) {
         RemoteCallResponse response = new RemoteCallResponse();
         MiniObject wrap = MiniUtil.wrap(result);
-        if (wrap != null) {
+        if (wrap != null && wrap.getClass() == MiniObject.class) {
             response.setSessionId(sessionId);
             response.setResult(wrap);
         } else {

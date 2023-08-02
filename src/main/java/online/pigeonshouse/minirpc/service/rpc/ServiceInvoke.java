@@ -41,13 +41,24 @@ public class ServiceInvoke {
         }
     }
 
+    public void putResultWait(String uuid, RemoteCallResponse object){
+        responseFilter.filter(object);
+        resultCache.put(uuid, object);
+    }
+
     public RemoteCallResponse getResult(String uuid, Object waitObject, long timeout) {
         RemoteCallResponse object = resultCache.get(uuid);
         if (object == null) {
             this.waitObject.put(uuid, waitObject);
             synchronized (waitObject) {
                 try {
-                    waitObject.wait(timeout);
+                    if (timeout == -1) {
+                        System.out.println("session " + uuid + " wait for result.");
+                        waitObject.wait();
+                    }else {
+                        System.out.println("session " + uuid + " wait for result. And timeout is " + timeout);
+                        waitObject.wait(timeout);
+                    }
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

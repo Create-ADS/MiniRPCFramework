@@ -1,18 +1,19 @@
 package online.pigeonshouse.minirpc.service.rpc;
 
 import cn.hutool.core.annotation.AnnotationUtil;
+import cn.hutool.core.map.TableMap;
 import cn.hutool.core.util.StrUtil;
 import online.pigeonshouse.minirpc.MiniService;
 import online.pigeonshouse.minirpc.service.PublicService;
+import online.pigeonshouse.minirpc.util.method.MatchResult;
+import online.pigeonshouse.minirpc.util.method.MethodUtil;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class MethodCache {
 
-    private final Map<String, Method> cache = new HashMap<>();
+    private final TableMap<String, Method> cache = new TableMap<>();
 
     public void registerClass(Class<? extends Service> clazz) {
         if (!AnnotationUtil.hasAnnotation(clazz, MiniService.class)) {
@@ -27,18 +28,21 @@ public class MethodCache {
                 continue;
             }
             String methodName = method.getName();
-            boolean aStatic = Modifier.isStatic(method.getModifiers());
-            StringBuilder paramNamesString = new StringBuilder();
-            for (int i = 0; i < method.getParameterCount(); i++) {
-                paramNamesString.append("param").append(i).append(",");
-            }
-            String key = clazz.getName() + "&" + methodName + "&" + (aStatic ? "static" : "non-static") + "&" + paramNamesString;
-            cache.put(key, method);
+            cache.put(methodName, method);
         }
     }
 
-    public Method getMethod(String key) {
-        return cache.get(key);
+    public Method getMethod(String key, Object[] obj) {
+        List<Method> values = cache.getValues(key);
+        if (values.size() == 0) {
+            return null;
+        }
+        for (Method method : values) {
+            if (MethodUtil.isMatch(method, obj) == MatchResult.SUCCESS) {
+                return method;
+            }
+        }
+        return null;
     }
 
 }

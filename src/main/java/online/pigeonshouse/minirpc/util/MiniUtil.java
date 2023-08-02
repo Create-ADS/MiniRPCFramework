@@ -4,6 +4,7 @@ import cn.hutool.core.util.ClassUtil;
 import online.pigeonshouse.minirpc.MiniType;
 import online.pigeonshouse.minirpc.framwork.Parameter;
 import online.pigeonshouse.minirpc.framwork.response.MessageResponse;
+import online.pigeonshouse.minirpc.service.MiniElement;
 import online.pigeonshouse.minirpc.service.MiniObject;
 import online.pigeonshouse.minirpc.thread.ResponseFilterListener;
 import online.pigeonshouse.minirpc.thread.SimpleResponseFilterListener;
@@ -76,7 +77,7 @@ public class MiniUtil {
             case NULL:
                 return null;
             default:
-                throw new RuntimeException("Unsupported type");
+                throw new RuntimeException("Unsupported type:" + param.getTYPE());
         }
     }
 
@@ -87,7 +88,7 @@ public class MiniUtil {
         }
         Parameter[] parameters = new Parameter[wraps.length];
         for (int i = 0; i < wraps.length; i++) {
-            parameters[i] = new Parameter("parameters" + i, wraps[i]);
+            parameters[i] = new Parameter(params[i].getClass().getName(), wraps[i]);
         }
         return parameters;
     }
@@ -116,12 +117,15 @@ public class MiniUtil {
             String className = miniObject.getClassName();
             try {
                 Class<?> aClass = ClassUtil.loadClass(className);
+                if (!ClassUtil.isAssignable(MiniObject.class, aClass)) {
+                    throw new RuntimeException("Cannot create instance of " + className);
+                }
                 Object obj;
                 try {
-                    obj = aClass.newInstance();
+                    obj = aClass.getConstructor(String.class).newInstance(miniObject.getUUID());
                 } catch (Exception e) {
                     try {
-                        obj = aClass.getConstructor(String.class).newInstance(miniObject.getUUID());
+                        obj = aClass.newInstance();
                     }catch (Exception e1){
                         throw new RuntimeException("Cannot create instance of " + className);
                     }

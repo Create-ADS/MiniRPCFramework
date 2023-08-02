@@ -1,6 +1,7 @@
 package online.pigeonshouse.minirpc.demo;
 
 import cn.hutool.core.util.IdUtil;
+import online.pigeonshouse.minirpc.demo.service.Test;
 import online.pigeonshouse.minirpc.framwork.Initialization;
 import online.pigeonshouse.minirpc.service.MiniObject;
 import online.pigeonshouse.minirpc.service.rpc.RpcInvokeDynamicHelperImpl;
@@ -29,7 +30,6 @@ public class ClientStartTest {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        // 动态调用
         RpcInvokeDynamicHelperImpl helloService = new RpcInvokeDynamicHelperImpl(clientBoot.getClientInvoke() ,"HelloService", "1.0");
         MiniObject test = helloService.invokeForResult(MiniObject.class, "sayHello");
         String result = helloService.invokeForResult(String.class, "sayHello",
@@ -39,8 +39,8 @@ public class ClientStartTest {
                 "Mike", 18);
         System.out.println(result1);
         Hello hello = new Hello(clientBoot.getClientInvoke());
-        String result2 = hello.sayHello("world");
-        System.out.println(result2);
+        Test test1 = hello.sayHello();
+        System.out.println(hello.sayHello(test1));
         String result3 = hello.sayHello("Mike", 18);
         System.out.println(result3);
 
@@ -50,6 +50,7 @@ public class ClientStartTest {
         ResponseFilterListener listener = new ResponseFilterListener(sessionId, String.class) {
             @Override
             public boolean isResponseFiltered(String sessionId) {
+                System.out.println("Response filtered: " + sessionId);
                 return this.sessionId.equals(sessionId);
             }
 
@@ -59,6 +60,10 @@ public class ClientStartTest {
             }
         };
         responseFilter.addResponseFilter(listener);
-        helloService.invoke("sayHello", listener);
+        //[ResponseFilterListener(sessionId=5743d4d0358c46748c826648005cb21b, paramsType=null)]
+//        helloService.invoke("sayHello", listener);
+        //[ResponseFilterListener(sessionId=83b89f9c4b64430c9bd9ca125b4f2fb9, paramsType=null)]
+        hello.sayHello(listener);
+        System.out.println(123);
     }
 }
